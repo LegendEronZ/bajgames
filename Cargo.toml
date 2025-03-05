@@ -5,3 +5,7 @@ edition = "2024"
 
 [dependencies]
 bevy = { version = "0.15.3", features = ["wayland"] }
+
+[profile.release]
+lto = true
+opt-level = 's'

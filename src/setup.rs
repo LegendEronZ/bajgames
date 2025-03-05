@@ -3,7 +3,7 @@ use bevy::{
     asset::{AssetServer, Assets},
     color::Color,
     core_pipeline::{bloom::Bloom, core_2d::Camera2d},
-    ecs::system::{Commands, Query, Res, ResMut, Resource},
+    ecs::system::{Commands, Res, ResMut, Resource},
     math::primitives::Rectangle,
     render::{
         camera::Camera,
@@ -13,28 +13,29 @@ use bevy::{
     text::{FontSmoothing, Text2d, TextFont},
     transform::components::Transform,
     utils::default,
-    window::Window,
 };
+
+use crate::game_logic::WindowBounds;
 
 #[derive(Resource)]
 struct GameTitle(String);
 
-pub struct ScenePlugin {
+pub struct SetupPlugin {
     pub title: String,
 }
 
-impl Plugin for ScenePlugin {
+impl Plugin for SetupPlugin {
     fn build(&self, app: &mut App) {
         app.insert_resource(GameTitle(self.title.clone()))
             .add_systems(Startup, (Self::setup_camera, Self::setup_scene));
     }
 }
 
-impl ScenePlugin {
+impl SetupPlugin {
     fn setup_scene(
         mut commands: Commands,
         asset_server: Res<AssetServer>,
-        window: Query<&mut Window>,
+        window_bounds: Res<WindowBounds>,
         mut meshes: ResMut<Assets<Mesh>>,
         mut materials: ResMut<Assets<ColorMaterial>>,
         game_title: Res<GameTitle>,
@@ -50,11 +51,11 @@ impl ScenePlugin {
         commands.spawn((
             Text2d::new(game_title.0.clone()),
             text_font.clone(),
-            Transform::from_xyz(0., window.single().height() / 2.0 - 20.0, 0.),
+            Transform::from_xyz(0., window_bounds.y / 2.0 - 20.0, 0.),
         ));
 
         commands.spawn((
-            Mesh2d(meshes.add(Rectangle::new(2560.0, 1440.0))),
+            Mesh2d(meshes.add(Rectangle::new(window_bounds.x, window_bounds.y))),
             MeshMaterial2d(materials.add(Color::srgb(0.0, 0.0, 0.0))),
         ));
     }
