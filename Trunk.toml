@@ -1,3 +1,2 @@
 [build]
-dist = "docs"            # The output dir for all final assets.
 public_url = "/bajgames"

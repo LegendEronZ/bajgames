@@ -16,22 +16,6 @@ use bevy::{
 };
 
 fn main() {
-    #[cfg(target_arch = "wasm32")]
-    {
-        App::new()
-            .add_plugins(
-                DefaultPlugins
-                    .set(AssetPlugin {
-                        meta_check: AssetMetaCheck::Never,
-                        ..default()
-                    })
-                    .disable::<LogPlugin>(),
-            )
-            .add_plugins(BajpongPlugin)
-            .run();
-    }
-
-    #[cfg(not(target_arch = "wasm32"))]
     App::new()
         .add_plugins(DefaultPlugins.set(AssetPlugin {
             meta_check: AssetMetaCheck::Never,
