@@ -25,15 +25,15 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
       - name: Setup Rust
         uses: dtolnay/rust-toolchain@stable
         with:
             targets: wasm32-unknown-unknown
             toolchain: stable
       - name: Install Trunk
-        run: cargo install trunk
+        run: wget -qO- https://github.com/trunk-rs/trunk/releases/download/v0.21.8/trunk-x86_64-unknown-linux-gnu.tar.gz | tar -xzf- -C ~/.cargo/bin
+      - name: Checkout
+        uses: actions/checkout@v4
       - name: Build Site
         run: trunk build --release
       - name: Setup Pages
