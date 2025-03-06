@@ -17,7 +17,10 @@ use bevy::{
 use crate::{game_logic::WindowBounds, player::Player};
 
 #[derive(Component)]
-pub struct Enemy;
+pub struct Enemy {
+    movement_speed: f32,
+    pub points: i32,
+}
 
 #[derive(Component)]
 pub enum Direction {
@@ -36,13 +39,10 @@ impl Plugin for EnemyPlugin {
 
 fn move_enemy(
     time: Res<Time>,
-    enemy: Single<&mut Transform, (With<Enemy>, Without<Player>)>,
-    player: Single<&Transform, (With<Player>, Without<Enemy>)>,
+    mut enemy_transform: Single<&mut Transform, (With<Enemy>, Without<Player>)>,
+    player_transform: Single<&Transform, (With<Player>, Without<Enemy>)>,
     keys: Res<ButtonInput<KeyCode>>,
 ) {
-    let mut enemy_transform = enemy;
-    let player_transform = player;
-
     enemy_transform.translation.y = -player_transform.translation.y;
 }
 
@@ -56,7 +56,10 @@ fn spawn_enemy(
     let texture = asset_loader.load("textures/xqcL.png");
 
     commands.spawn((
-        Enemy,
+        Enemy {
+            movement_speed: 300.0,
+            points: 0,
+        },
         Mesh2d(meshes.add(Rectangle::new(20.0, 100.0))),
         MeshMaterial2d(materials.add(texture)),
         Transform::from_xyz(window_bounds.x / 2. - 60., 0., 2.),

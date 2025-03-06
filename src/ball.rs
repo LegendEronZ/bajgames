@@ -4,6 +4,7 @@ use bevy::{
     color::Color,
     ecs::{
         component::Component,
+        event::EventWriter,
         query::{With, Without},
         system::{Commands, Res, ResMut, Single},
     },
@@ -17,7 +18,11 @@ use bevy::{
     transform::components::Transform,
 };
 
-use crate::{enemy::Enemy, game_logic::WindowBounds, player::Player};
+use crate::{
+    enemy::Enemy,
+    game_logic::{EnemyScoredEvent, PlayerScoredEvent, WindowBounds},
+    player::Player,
+};
 
 #[derive(Component)]
 struct Ball;
@@ -126,6 +131,10 @@ fn hit_enemy(
 fn hit_wall(
     window_bounds: Res<WindowBounds>,
     mut ball: Single<(&mut Transform, &mut Direction), With<Ball>>,
+    mut player: Single<&mut Player>,
+    mut enemy: Single<&mut Enemy>,
+    mut player_scored_event: EventWriter<PlayerScoredEvent>,
+    mut enemy_scored_event: EventWriter<EnemyScoredEvent>,
 ) {
     if ball.0.translation.y >= window_bounds.y / 2. - 10. {
         match *ball.1 {
@@ -140,16 +149,16 @@ fn hit_wall(
             _ => (),
         }
     } else if ball.0.translation.x <= -window_bounds.x / 2. + 10. {
-        match *ball.1 {
-            Direction::UpLeft => *ball.1 = Direction::UpRight,
-            Direction::DownLeft => *ball.1 = Direction::DownRight,
-            _ => (),
-        }
+        *ball.1 = Direction::UpRight;
+        *ball.0 = Transform::from_xyz(0., 0., 2.);
+
+        enemy.points += 1;
+        enemy_scored_event.send(EnemyScoredEvent);
     } else if ball.0.translation.x >= window_bounds.x / 2. - 10. {
-        match *ball.1 {
-            Direction::UpRight => *ball.1 = Direction::UpLeft,
-            Direction::DownRight => *ball.1 = Direction::DownLeft,
-            _ => (),
-        }
+        *ball.1 = Direction::UpLeft;
+        *ball.0 = Transform::from_xyz(0., 0., 2.);
+
+        player.points += 1;
+        player_scored_event.send(PlayerScoredEvent);
     }
 }

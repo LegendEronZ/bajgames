@@ -17,7 +17,10 @@ use bevy::{
 use crate::{enemy::Enemy, game_logic::WindowBounds};
 
 #[derive(Component)]
-pub struct Player;
+pub struct Player {
+    movement_speed: f32,
+    pub points: i32,
+}
 
 pub struct PlayerPlugin;
 
@@ -30,21 +33,21 @@ impl Plugin for PlayerPlugin {
 
 fn move_player(
     time: Res<Time>,
-    player: Single<&mut Transform, (With<Player>, Without<Enemy>)>,
+    query: Single<(&Player, &mut Transform)>,
     window_bounds: Res<WindowBounds>,
     keys: Res<ButtonInput<KeyCode>>,
 ) {
-    let mut transform = player;
+    let (player, mut transform) = query.into_inner();
 
     if keys.pressed(KeyCode::ArrowUp) || keys.pressed(KeyCode::KeyW) {
         if transform.translation.y <= window_bounds.y / 2. - 50. {
-            transform.translation.y += 300.0 * time.delta_secs();
+            transform.translation.y += player.movement_speed * time.delta_secs();
         }
     }
 
     if keys.pressed(KeyCode::ArrowDown) || keys.pressed(KeyCode::KeyS) {
         if transform.translation.y >= -window_bounds.y / 2. + 50. {
-            transform.translation.y -= 300.0 * time.delta_secs();
+            transform.translation.y -= player.movement_speed * time.delta_secs();
         }
     }
 }
@@ -59,7 +62,10 @@ fn spawn_player(
     let texture = asset_loader.load("textures/forsenE.png");
 
     commands.spawn((
-        Player,
+        Player {
+            movement_speed: 300.0,
+            points: 0,
+        },
         Mesh2d(meshes.add(Rectangle::new(20.0, 100.0))),
         MeshMaterial2d(materials.add(texture)),
         Transform::from_xyz(-window_bounds.x / 2. + 60., 0., 2.),
